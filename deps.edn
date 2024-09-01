@@ -1,0 +1,19 @@
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.0-rc2"}
+        net.java.dev.jna/jna {:mvn/version "5.13.0"}
+        com.phronemophobic/clong {;; :mvn/version "1.4.1"
+                                  :local/root "../clong"}
+        org.clojure/core.async {:mvn/version "1.6.681"}
+        }
+ :aliases
+ {:project
+  {:extra-deps {org.bytedeco/llvm-platform {:mvn/version "16.0.4-1.5.9"}
+                #_#_com.phronemophobic/clj-media {;; :mvn/version "2.3"
+                                      :local/root "../clj-media"
+                                      }}
+   :jvm-opts [
+              
+              "-Djna.library.path=../whisper.cpp/build/src/"
+              
+              ]}}}
+
