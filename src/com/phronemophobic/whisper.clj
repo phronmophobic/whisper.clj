@@ -130,7 +130,6 @@
        (loop []
          (when @running?
            (let [bytes-read (.read line buf 0 (alength buf))]
-             (prn bytes-read)
              (.write out buf 0 bytes-read)
              (recur)))))
 
