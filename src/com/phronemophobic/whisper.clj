@@ -18,7 +18,13 @@
                                 AudioSystem
                                 AudioFormat$Encoding)))
 
-(defn transcribe [model-path bs]
+(defn transcribe
+  "Given a `model-path` to a whisper model and a byte array of
+  sound samples, return a string with the transcribed text.
+
+  The sounds samples must be in pcm signed 32 bit float format
+  with a sampling rate of 16,000."
+  [model-path bs]
   (let [cparams (raw/whisper_context_default_params)
         
         ctx (raw/whisper_init_from_file_with_params model-path
@@ -40,7 +46,11 @@
       (raw/whisper_free ctx)
       transcription)))
 
-(defn pcms16->pcmf32 [bs]
+(defn pcms16->pcmf32
+  "Convert a byte array of PCM signed shorts,
+  return a byte array of pcm signed 32 bit floats.
+  "
+  [bs]
   (let [inbuf (doto (ByteBuffer/wrap bs)
                 (.order (ByteOrder/nativeOrder)))
         buf (doto (ByteBuffer/allocate (* 2 (alength bs)))
@@ -63,7 +73,11 @@
     (.get fbuf flts)
     flts))
 
-(defn downsample [bs from-sample-rate to-sample-rate]
+(defn downsample
+  "Convert the sound samples, `bs` from `from-sample-rate` to `to-sample-rate`.
+
+  The sound samples must be pcmf32."
+  [bs from-sample-rate to-sample-rate]
   (assert (< to-sample-rate from-sample-rate))
   (let [num-samples (dec
                      (long
@@ -105,6 +119,10 @@
     audio-format))
 
 (defn record-audio
+  "Records audio from the default microphone.
+
+  Returns a function that will stop recording and return the
+  recorded audio as a byte array in pcmf32 with a sample rate of 44100."
   ([]
    (record-audio {}))
   ([opts]
@@ -144,7 +162,12 @@
              (recur))))
        (.toByteArray out)))))
 
-(defn record-and-transcribe [model-path]
+(defn record-and-transcribe
+  "Starts recording audio from the default system microphone.
+
+  Returns a function that will stop recording and return the
+  transcribed text when called."
+  [model-path]
   (let [get-audio (record-audio)]
     (fn []
       (transcribe model-path
