@@ -12,7 +12,9 @@
                                       }}
    :jvm-opts [
               
-              "-Djna.library.path=../whisper.cpp/build/src/"
-              
-              ]}}}
+              "-Djna.library.path=../whisper.cpp/build/src/"]}
+  :build
+  {:deps {io.github.clojure/tools.build {:mvn/version "0.10.5"}
+          slipset/deps-deploy {:mvn/version "RELEASE"}}
+   :ns-default build}}}
 
