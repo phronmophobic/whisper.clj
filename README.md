@@ -49,7 +49,7 @@ Create alias to point to local build
 (def transcription (get-text))
 ```
 
-If it didn't work, you may have to check your OSX permissions and allow microhpone access to Terminal.
+If it didn't work, you may have to check your OSX permissions and allow microphone access to Terminal.
 
 ## License
 
