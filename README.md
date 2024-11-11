@@ -43,7 +43,7 @@ Create alias to point to local build
 (require '[com.phronemophobic.whisper :as whisper])
 
 ;; start recording
-(def get-text (record-and-transcribe))
+(def get-text (record-and-transcribe "models/ggml-base.en.bin"))
 
 ;; stop recording and return transcription
 (def transcription (get-text))

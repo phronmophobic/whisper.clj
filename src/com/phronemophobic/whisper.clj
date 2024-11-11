@@ -18,10 +18,10 @@
                                 AudioSystem
                                 AudioFormat$Encoding)))
 
-(defn transcribe [bs]
+(defn transcribe [model-path bs]
   (let [cparams (raw/whisper_context_default_params)
         
-        ctx (raw/whisper_init_from_file_with_params "../whisper.clj/models/ggml-base.en.bin"
+        ctx (raw/whisper_init_from_file_with_params model-path
                                                     cparams)
         
         wparams (raw/whisper_full_default_params raw/WHISPER_SAMPLING_BEAM_SEARCH)
@@ -144,10 +144,11 @@
              (recur))))
        (.toByteArray out)))))
 
-(defn record-and-transcribe []
+(defn record-and-transcribe [model-path]
   (let [get-audio (record-audio)]
     (fn []
-      (transcribe (-> (get-audio)
+      (transcribe model-path
+                  (-> (get-audio)
                       pcms16->pcmf32
                       (downsample 44100 16000))))))
 
@@ -232,7 +233,11 @@
   (.get (.asFloatBuffer my-frame) my-floats)
 
 
-  
+  ;; start recording
+  (def get-text (record-and-transcribe "models/ggml-base.en.bin"))
+
+  ;; stop recording and return transcription
+  (def transcription (get-text))
   
   ,)
 
