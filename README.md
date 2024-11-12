@@ -1,6 +1,6 @@
 # whisper.clj
 
-Clojure wrapper for [whisper.cpp](https://github.com/ggerganov/whisper.cpp). Provides audio transcription.
+Clojure wrapper for [whisper.cpp](https://github.com/ggerganov/whisper.cpp). Provides local audio transcription.
 
 ## Usage
 
