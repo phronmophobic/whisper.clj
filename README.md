@@ -60,18 +60,34 @@ Create alias to point to local build
 
 ### 6. Transcribe Audio
 
+####  Transcribe Recorded Audio
+
 ```clojure
 
 (require '[com.phronemophobic.whisper :as whisper])
 
 ;; start recording from the default system microphone
-(def get-text (record-and-transcribe "models/ggml-base.en.bin"))
+(def get-text (whisper/record-and-transcribe "models/ggml-base.en.bin"))
 
 ;; stop recording and return transcription
 (def transcription (get-text))
 ```
 
 If it didn't work, you may have to check your OSX permissions and allow microphone access to Terminal.
+
+##### Transcribe Wav
+
+```clojure
+(require '[com.phronemophobic.whisper :as whisper])
+
+;; start recording from the default system microphone
+;; stop recording and return transcription
+(def transcription (whisper/transcribe-wav
+                    "models/ggml-base.en.bin"
+                    "my-audio.wav"))
+```
+
+
 
 ## License
 

@@ -15,8 +15,10 @@
            (javax.sound.sampled AudioFormat
                                 DataLine$Info
                                 TargetDataLine
+                                AudioInputStream
                                 AudioSystem
                                 AudioFormat$Encoding)))
+
 
 (defn transcribe
   "Given a `model-path` to a whisper model and a byte array of
@@ -122,7 +124,7 @@
   "Records audio from the default microphone.
 
   Returns a function that will stop recording and return the
-  recorded audio as a byte array in pcmf32 with a sample rate of 44100."
+  recorded audio as a byte array in mono, signed short format."
   ([]
    (record-audio {}))
   ([opts]
@@ -175,7 +177,44 @@
                       pcms16->pcmf32
                       (downsample 44100 16000))))))
 
+
+
+
+(defn ^:private convert-audio-format [audio-input-stream target-format]
+  (let [decoded-stream (AudioSystem/getAudioInputStream target-format audio-input-stream)]
+    decoded-stream))
+
+(defn read-wav
+  "Reads a wav file and returns a byte array in PCM signed shorts format."
+  [file-path]
+  (let [audio-input-stream (AudioSystem/getAudioInputStream (java.io.File. file-path))
+        original-format (.getFormat audio-input-stream)
+        target-format (default-mono-format)]
+    (try
+      (let [converted-stream (if (= original-format target-format)
+                               audio-input-stream
+                               (convert-audio-format audio-input-stream target-format))
+            frame-length (.getFrameLength converted-stream)
+            buffer-size (* frame-length (.getFrameSize target-format))
+            byte-buffer (byte-array buffer-size)]
+        (.read converted-stream byte-buffer)
+        byte-buffer)
+      (finally
+        (.close audio-input-stream)))))
+
+(defn transcribe-wav
+  "Given the path to a whisper model and a wav file,
+  return the transcribed text."
+  [model-path wav-path]
+  (transcribe model-path
+              (-> (read-wav wav-path)
+                  pcms16->pcmf32
+                  (downsample 44100 16000))))
+
 (comment
+
+  (transcribe-wav "models/ggml-base.en.bin"
+                  "/var/tmp/firehose/the-language.wav")
 
   (def get-text (record-and-transcribe))
 
@@ -183,86 +222,7 @@
 
   ,)
 
-#_(defn read-media [f]
-  (let [bos (ByteArrayOutputStream.)
-        frames (clj-media/frames
-                (clj-media/file f)
-                :audio
-                {:format (clj-media/audio-format
-                          {:channel-layout "mono"
-                           :sample-rate 16000
-                           :sample-format :sample-format/flt})})]
-    (transduce
-     
-     (map (fn [frame]
-            (let [bb (mm/byte-buffer frame)
-                  bs (byte-array (.capacity bb))]
-              (.get bb bs)
-              (.write bos bs 0 (alength bs)))))
-     (constantly nil)
-     nil
-     frames)
-    (.toByteArray bos)))
 
-(comment
-
-  (let [f (io/file "/var/tmp/transcribe.mp3")
-        format (clj-media/audio-format
-                {:channel-layout "mono"
-                 :sample-rate 44100
-                 :sample-format :sample-format/flt
-                 ;;:codec {:id 65557}
-                 })]
-
-    (clj-media/write!
-     (clj-media/make-media
-      format
-      [(clj-media/make-frame
-        {:format format
-         :bytes (pcms16->pcmf32 bs)
-         :time-base 44100
-         :pts 0})])
-     (.getCanonicalPath f)))
-
-  (def frames
-    (into []
-          (let [in-format (clj-media/audio-format
-                           {:channel-layout "mono"
-                            :sample-rate 44100
-                            :sample-format :sample-format/s16})]
-            (clj-media/frames
-             (clj-media/make-media
-              in-format
-              [(clj-media/make-frame
-                {:format in-format
-                 :bytes bs
-                 :time-base 44100
-                 :pts 0})])
-             :audio
-             {:format (clj-media/audio-format
-                       {:channel-layout "mono"
-                        :sample-rate 44100
-                        :sample-format :sample-format/flt})}))))
-
-  (def my-frame
-    (-> frames
-        first
-        mm/byte-buffer
-        ))
-  (def my-bytes (byte-array (.capacity my-frame)))
-  (.get my-frame my-bytes)
-
-  (def my-floats (float-array (quot (.capacity my-frame) 4)))
-  (.get (.asFloatBuffer my-frame) my-floats)
-
-
-  ;; start recording
-  (def get-text (record-and-transcribe "models/ggml-base.en.bin"))
-
-  ;; stop recording and return transcription
-  (def transcription (get-text))
-  
-  ,)
 
 
 
