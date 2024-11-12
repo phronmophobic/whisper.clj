@@ -31,6 +31,9 @@
         
         ctx (raw/whisper_init_from_file_with_params model-path
                                                     cparams)
+        _ (when (not ctx)
+            (throw (ex-info "Whisper model could not be loaded"
+                            {:model-path model-path})))
         
         wparams (raw/whisper_full_default_params raw/WHISPER_SAMPLING_BEAM_SEARCH)
         buf (doto (Memory. (alength bs))
