@@ -4,22 +4,42 @@ Clojure wrapper for whisper.cpp. Transcribe audio.
 
 ## Usage
 
-### 1. Build whisper.cpp
+### Dependency
+
+```clojure
+com.phronemophobic/whisper-clj {:mvn/version "1.0"}
+```
+## Native Dependencies
+
+```clojure
+com.phronemophobic.cljonda/whisper-cpp-darwin-aarch64 {:mvn/version "c96906d84dd6a1c40ea797ad542df3a0c47307a3"}
+com.phronemophobic.cljonda/whisper-cpp-darwin-x86-64 {:mvn/version "c96906d84dd6a1c40ea797ad542df3a0c47307a3"}
+com.phronemophobic.cljonda/whisper-cpp-linux-x86-64 {:mvn/version "c96906d84dd6a1c40ea797ad542df3a0c47307a3"}
+```
+
+### 1. Download whisper.cpp
 
 ```bash
 git clone https://github.com/ggerganov/whisper.cpp.git
+```
+
+### 2. Build whisper.cpp
+
+_This step can be skipped if the clojars native dependencies are used._
+
+```bash
 cmake -B build -DBUILD_SHARED_LIBS=1 -DGGML_USE_ACCELERATE=1 -DGGML_USE_METAL=1 -DGGML_METAL_EMBED_LIBRARY=1
 cmake --build build -j --config Release
 ```
 
-### 2. Download model
+### 3. Download model
 
 ```bash
 # in whisper.cpp
 bash ./models/download-ggml-model.sh base.en
 ```
 
-### 3. Copy model to whisper.clj
+### 4. Copy model to whisper.clj
 
 ```bash
 # in whisper.clj
@@ -27,7 +47,9 @@ mkdir models
 cp ../whisper.cpp/models/ggml-base.en.bin models/
 ```
 
-### 4. Setup alias
+### 5. Setup alias
+
+_This step can be skipped if the clojars native dependencies are used._
 
 Create alias to point to local build
 
@@ -36,13 +58,13 @@ Create alias to point to local build
 {:jvm-opts ["-Djna.library.path=../whisper.cpp/build/src/"]}
 ```
 
-### 5. Transcribe Audio
+### 6. Transcribe Audio
 
 ```clojure
 
 (require '[com.phronemophobic.whisper :as whisper])
 
-;; start recording
+;; start recording from the default system microphone
 (def get-text (record-and-transcribe "models/ggml-base.en.bin"))
 
 ;; stop recording and return transcription
