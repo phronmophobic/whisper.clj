@@ -59,6 +59,8 @@
 
 (def lib
   (delay
+    ;; whisper depends on ggml.
+    (com.sun.jna.NativeLibrary/getInstance "ggml")
     (com.sun.jna.NativeLibrary/getInstance "whisper")))
 
 (def raw-api
