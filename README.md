@@ -77,8 +77,8 @@ If it didn't work, you may have to check your OSX permissions and allow micropho
 ```clojure
 (require '[com.phronemophobic.whisper :as whisper])
 
-;; start recording from the default system microphone
-;; stop recording and return transcription
+;; reads `my-audio.wav` and returns
+;; the transcribed text.
 (def transcription (whisper/transcribe-wav
                     "models/ggml-base.en.bin"
                     "my-audio.wav"))
