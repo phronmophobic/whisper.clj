@@ -165,7 +165,10 @@
            (when (pos? bytes-read)
              (.write out buf 0 bytes-read)
              (recur))))
-       (.toByteArray out)))))
+       (let [result (.toByteArray out)]
+         (.flush line)
+         (.close line)
+         result)))))
 
 (defn record-and-transcribe
   "Starts recording audio from the default system microphone.
