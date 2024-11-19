@@ -84,7 +84,9 @@ If it didn't work, you may have to check your OSX permissions and allow micropho
                     "my-audio.wav"))
 ```
 
+## Examples
 
+[whistle](https://gitlab.com/devcarbon/whistle) - a voice-to-text typing tool for Linux and MacOS
 
 ## License
 
