@@ -166,7 +166,6 @@
              (.write out buf 0 bytes-read)
              (recur))))
        (let [result (.toByteArray out)]
-         (.flush line)
          (.close line)
          result)))))
 
