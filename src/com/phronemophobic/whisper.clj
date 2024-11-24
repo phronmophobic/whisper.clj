@@ -165,6 +165,7 @@
            (when (pos? bytes-read)
              (.write out buf 0 bytes-read)
              (recur))))
+       (.close line)
        (.toByteArray out)))))
 
 (defn record-and-transcribe
