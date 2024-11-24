@@ -26,7 +26,7 @@
 
   The sounds samples must be in pcm signed 32 bit float format
   with a sampling rate of 16,000."
-  [model-path bs]
+  [model-path ^bytes bs]
   (let [cparams (raw/whisper_context_default_params)
         
         ctx (raw/whisper_init_from_file_with_params model-path
@@ -55,7 +55,7 @@
   "Convert a byte array of PCM signed shorts,
   return a byte array of pcm signed 32 bit floats.
   "
-  [bs]
+  [^bytes bs]
   (let [inbuf (doto (ByteBuffer/wrap bs)
                 (.order (ByteOrder/nativeOrder)))
         buf (doto (ByteBuffer/allocate (* 2 (alength bs)))
@@ -68,7 +68,7 @@
     (.array buf)))
 
 
-(defn bytes->floats [bs]
+(defn bytes->floats [^bytes bs]
   (let [buf (doto (ByteBuffer/wrap bs)
               (.order (ByteOrder/nativeOrder)))
         fbuf (.asFloatBuffer buf)
@@ -82,7 +82,7 @@
   "Convert the sound samples, `bs` from `from-sample-rate` to `to-sample-rate`.
 
   The sound samples must be pcmf32."
-  [bs from-sample-rate to-sample-rate]
+  [^bytes bs from-sample-rate to-sample-rate]
   (assert (< to-sample-rate from-sample-rate))
   (let [num-samples (dec
                      (long
@@ -106,7 +106,7 @@
                               (.getFloat inbuf (* 4 i0))))))))
     (.array outbuf)))
 
-(defn default-mono-format []
+(defn default-mono-format ^AudioFormat []
   (let [sample-rate 44100
         sample-size-in-bits 16
         channels 1
@@ -185,17 +185,20 @@
 
 
 (defn ^:private convert-audio-format [audio-input-stream target-format]
-  (let [decoded-stream (AudioSystem/getAudioInputStream target-format audio-input-stream)]
+  (let [decoded-stream (AudioSystem/getAudioInputStream ^AudioFormat target-format
+                                                        ^AudioInputStream audio-input-stream)]
     decoded-stream))
 
 (defn read-wav
   "Reads a wav file and returns a byte array in PCM signed shorts format."
   [file-path]
-  (let [audio-input-stream (AudioSystem/getAudioInputStream (java.io.File. file-path))
+  (let [audio-input-stream (AudioSystem/getAudioInputStream
+                            (java.io.File. ^String file-path))
         original-format (.getFormat audio-input-stream)
         target-format (default-mono-format)]
     (try
-      (let [converted-stream (if (= original-format target-format)
+      (let [^AudioInputStream
+            converted-stream (if (= original-format target-format)
                                audio-input-stream
                                (convert-audio-format audio-input-stream target-format))
             frame-length (.getFrameLength converted-stream)
@@ -220,7 +223,7 @@
   (transcribe-wav "models/ggml-base.en.bin"
                   "/var/tmp/firehose/the-language.wav")
 
-  (def get-text (record-and-transcribe))
+  (def get-text (record-and-transcribe "models/ggml-base.en.bin"))
 
   (get-text)
 
