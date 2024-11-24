@@ -1,6 +1,6 @@
 # whisper.clj
 
-Clojure wrapper for [whisper.cpp](https://github.com/ggerganov/whisper.cpp). Transcribe audio.
+Clojure wrapper for [whisper.cpp](https://github.com/ggerganov/whisper.cpp). Provides local audio transcription.
 
 ## Usage
 
@@ -77,14 +77,16 @@ If it didn't work, you may have to check your OSX permissions and allow micropho
 ```clojure
 (require '[com.phronemophobic.whisper :as whisper])
 
-;; start recording from the default system microphone
-;; stop recording and return transcription
+;; reads `my-audio.wav` and returns
+;; the transcribed text.
 (def transcription (whisper/transcribe-wav
                     "models/ggml-base.en.bin"
                     "my-audio.wav"))
 ```
 
+## Examples
 
+[whistle](https://gitlab.com/devcarbon/whistle) - a voice-to-text typing tool for Linux and MacOS
 
 ## License
 
