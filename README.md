@@ -7,7 +7,7 @@ Clojure wrapper for [whisper.cpp](https://github.com/ggerganov/whisper.cpp). Pro
 ### Dependency
 
 ```clojure
-com.phronemophobic/whisper-clj {:mvn/version "1.0"}
+com.phronemophobic/whisper-clj {:mvn/version "1.2"}
 ;; native dependencies
 com.phronemophobic.cljonda/whisper-cpp-darwin-aarch64 {:mvn/version "c96906d84dd6a1c40ea797ad542df3a0c47307a3"}
 com.phronemophobic.cljonda/whisper-cpp-darwin-x86-64 {:mvn/version "c96906d84dd6a1c40ea797ad542df3a0c47307a3"}
