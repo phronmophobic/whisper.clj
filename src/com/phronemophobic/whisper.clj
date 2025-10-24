@@ -220,11 +220,10 @@
             converted-stream (if (= original-format target-format)
                                audio-input-stream
                                (convert-audio-format audio-input-stream target-format))
-            frame-length (.getFrameLength converted-stream)
-            buffer-size (* frame-length (.getFrameSize target-format))
-            byte-buffer (byte-array buffer-size)]
-        (.read converted-stream byte-buffer)
-        byte-buffer)
+            baos (ByteArrayOutputStream.)]
+        (io/copy converted-stream
+                 baos)
+        (.toByteArray baos))
       (finally
         (.close audio-input-stream)))))
 
