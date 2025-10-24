@@ -19,10 +19,13 @@
                                 AudioSystem
                                 AudioFormat$Encoding)))
 
-
-(defn transcribe
+(defn transcribe+
   "Given a `model-path` to a whisper model and a byte array of
-  sound samples, return a string with the transcribed text.
+  sound samples, return a collection of maps with the following keys:
+  `:text`: the transcribed text
+  `:t0ms`: the start time of the segment in milliseconds
+  `:t0ms`: the end time of the segment in milliseconds
+  `:speaker-turn?`: The speaker turn of the segment. I'm not actually sure what this is and it doesn't seem to be supported by most models.
 
   The sounds samples must be in pcm signed 32 bit float format
   with a sampling rate of 16,000."
@@ -43,13 +46,29 @@
     (raw/whisper_full ctx wparams buf n-samples)
     (let [n-segments (raw/whisper_full_n_segments ctx)
           transcription
-          (str/join
-           (eduction
-            (map (fn [i]
-                   (raw/whisper_full_get_segment_text ctx i)))
-            (range n-segments)))]
+          (into []
+                (map (fn [i]
+                       {:text (raw/whisper_full_get_segment_text ctx i)
+                        ;; //need to multiply times returned from whisper_full_get_segment_t{0,1}() by 10 to get milliseconds.
+                        :t0ms (* 10 (raw/whisper_full_get_segment_t0 ctx i))
+                        :t1ms (* 10 (raw/whisper_full_get_segment_t1 ctx i))
+                        :speaker-turn? (not (zero? (raw/whisper_full_get_segment_speaker_turn_next ctx i)))
+                        }))
+                (range n-segments))]
       (raw/whisper_free ctx)
       transcription)))
+
+(defn transcribe
+  "Given a `model-path` to a whisper model and a byte array of
+  sound samples, return a string with the transcribed text.
+
+  The sounds samples must be in pcm signed 32 bit float format
+  with a sampling rate of 16,000."
+  [model-path ^bytes bs]
+  (str/join
+   (eduction
+    (map :text)
+    (transcribe+ model-path ^bytes bs))))
 
 (defn pcms16->pcmf32
   "Convert a byte array of PCM signed shorts,
@@ -217,6 +236,15 @@
               (-> (read-wav wav-path)
                   pcms16->pcmf32
                   (downsample 44100 16000))))
+
+(defn transcribe-wav+
+  "Given the path to a whisper model and a wav file,
+  return the transcribed text as data."
+  [model-path wav-path]
+  (transcribe+ model-path
+               (-> (read-wav wav-path)
+                   pcms16->pcmf32
+                   (downsample 44100 16000))))
 
 (comment
 
